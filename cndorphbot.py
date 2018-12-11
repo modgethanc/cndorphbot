@@ -123,8 +123,8 @@ def said(channel, user, now, msg, network="", addressed=False):
     if re.match("^!rollcall", msg) or re.match("^!help", msg):
         response.append("cndorphbot here! i'm pretty useless, but i'm doing my best. i know about: !conjure, !botsnack, !snack-count. send a pm to {admin} if you think i'm misbehaving!".format(admin=ADMIN))
     if re.match("^!conjure", msg):
-        time.sleep(random.randrange(2,8))
-        response.append(conjure_handler())
+        time.sleep(random.randrange(2,5))
+        response.append(conjure_handler(user))
     elif re.match('^!botsnack', msg):
         response.append(botsnack_handler(user))
     elif re.match('^!snack-count', msg):
@@ -133,13 +133,7 @@ def said(channel, user, now, msg, network="", addressed=False):
         response.append("i've learned the following tricks: "+", ".join(SELF.get("tricks", [])))
     else:
         ## passive random behavior
-        if dice == 1:
-            time.sleep(random.randrange(2,8))
-            response.append(",get")
-        elif dice == 2:
-            time.sleep(random.randrange(2,8))
-            response.append(conjure_handler())
-        elif dice > 95:
+        if dice > 95:
             response.append(trick())
 
     return response
@@ -224,6 +218,7 @@ def did(channel, user, msg):
     global SELF
 
     if user == "kelpiebot":
+        ## handler for ,get response
         if msg.startswith("retrieves"):
             if msg.find("hands it to "+BOTNICK) != -1:
                 item = " ".join(msg.split("retrieves ")[1:]).split(" and hands it to")[0].split(" ")[1:]
@@ -269,21 +264,9 @@ def ping():
         "channel": ADMIN
         })
 
-    if dice < 3:
-        ## conjure an item
-        response.append({
-            "msg": conjure_handler(),
-            "channel": "MAIN"
-        })
     if dice > 90 and dice < 95:
         response.append({
             "msg": trick(),
-            "channel": "MAIN"
-            })
-    if dice >= 98:
-        ## ask for an item
-        response.append({
-            "msg": ",get",
             "channel": "MAIN"
             })
 
@@ -300,6 +283,8 @@ def trick():
     if trick in ["!water", "!talklike"]:
         ## manual targetted tricks
         trick = "{trick} {target}".format(trick=trick, target=random.choice(TOWNIES.keys()))
+    if trick in ["!wiki-philosophy"]:
+        trick = "{trick} {target}".format(trick=trick, target=chatter.say("stuff"))
 
     return trick
 
@@ -315,7 +300,7 @@ def absorb(msg):
         if token.startswith("!") and\
            token not in SELF.get("tricks", []) and\
            token not in SELF.get("commands", []):
-            ## learn !incancations
+            ## learn !incantations
             tricks = SELF.get("tricks", [])
             tricks.append(token.split(",")[0].split(".")[0])
             SELF.update({"tricks": tricks})
@@ -323,21 +308,17 @@ def absorb(msg):
 
     return
 
-def conjure_handler():
+def conjure_handler(nick):
     """
-    Generats a mysterious item and gives it to kelpiebot.
+    Generats a mysterious item and gives it to the named person.
     """
-
     global SELF
 
     thing = "{adjective} {stuff}".format(adjective=chatter.say("adjective"), stuff=chatter.say("stuff"))
+    count = TOWNIES.get(nick).give_item(thing)
 
-    conjured = SELF.get("conjured", [])
-    conjured.append(thing)
-    SELF.update({"conjured": conjured})
-    save_self()
-
-    return ",give {thing}".format(thing=thing)
+    return "here, take this {thing}! you've got {things} from me now.".format(thing=thing,
+            things=p.no("thing", count))
 
 def botsnack_handler(nick):
     """
@@ -369,6 +350,7 @@ class Townie():
         self.nick = nick
         self.aliases = []
         self.snacksGiven = 0
+        self.inventory = []
 
     def save(self):
         '''
@@ -389,6 +371,7 @@ class Townie():
                 "nick": self.nick,
                 "aliases": self.aliases,
                 "snacksGiven": self.snacksGiven,
+                "inventory": self.inventory
                 }
 
     def to_string(self, oneline=True):
@@ -429,6 +412,7 @@ class Townie():
         self.nick = townie_data.get("nick", "")
         self.aliases = townie_data.get("aliases", [])
         self.snacksGiven = townie_data.get("snacksGiven", 0)
+        self.inventory = townie_data.get("inventory", [])
 
         return self.nick
 
@@ -442,7 +426,13 @@ class Townie():
         self.snacksGiven += 1
         self.save()
 
+    def give_item(self, item):
+        """
+        Adds item to inventory, returning number of items.
+        """
 
+        self.inventory.append(item)
+        return len(self.inventory)
 
 
 ## default actions
