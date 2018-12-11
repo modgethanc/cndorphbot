@@ -1,11 +1,7 @@
 #!/usr/bin/python
 
 '''
-this chunk of code came from somewhere in the tilde.town irc botpile. i have no
-idea who started it! please feel free to claim credit.
-
-this version last modified by ~endorphant (endorphant@tilde.town)
-
+Formats IRC messages for bot parsing.
 '''
 
 import time
@@ -17,8 +13,8 @@ def format_message(message):
     tab-delineated string in the following order:
 
     [0] current time as int
-    [1] username (truncates to 9 characters due to current
-        tilde.town server settings)
+    [1] username (sometimes truncated to 9 characters depdnign on server
+        settings
     [2] irc command ('PRIVMSG', 'JOIN', 'TOPIC', etc.)
     [3] #channel (includes #)
     [4] full message

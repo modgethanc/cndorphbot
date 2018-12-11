@@ -44,7 +44,13 @@ vocab = {
             "i'm confused by what you said...",
             "that's not something i can figure out...",
             "you might want to check with someone else...",
-            "i dunno how to handle this..."
+            "i dunno how to handle this...",
+            "i'll do my best",
+            "umm...",
+            "maybe ask someone else?",
+            "i'm not the best one to talk to about this",
+            "i'm trying!",
+            "well, i dunno"
             ],
         "adjective": [
             "blue",
@@ -84,7 +90,8 @@ vocab = {
             "bicycle",
             "flowerpot",
             "sack",
-            "egg"
+            "egg",
+            "toadstool"
             ],
         "affection": [
             "aww, thanks <3",

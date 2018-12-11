@@ -21,7 +21,7 @@ HOME_CHAN = "#test"
 SELF = {}
 TOWNIES = {}
 
-BOTNICK = ""
+BOTNICK = "cndorphbot"
 ADMIN = ""
 
 ### config
@@ -140,7 +140,7 @@ def said(channel, user, now, msg, network="", addressed=False):
             time.sleep(random.randrange(2,8))
             response.append(conjure_handler())
         elif dice > 95:
-            response.append(random.choice(SELF.get("tricks", [":)"])))
+            response.append(trick())
 
     return response
 
@@ -183,8 +183,14 @@ def addressed(channel, user, now, msg, network=""):
     elif msg.find("report") != -1:
         response.append("!tildescore")
     else:
-        time.sleep(3)
-        response.append(tag+chatter.say("no answer"))
+        if user == "tildebot":
+            response.append({
+                "channel": ADMIN,
+                "msg": msg
+                })
+        else:
+            time.sleep(3)
+            response.append(tag+chatter.say("no answer"))
 
     return response
 
@@ -193,7 +199,7 @@ def seen(channel, user):
     Handler for processing join actions.
     """
 
-    time.sleep(2)
+    time.sleep(random.randrange(2,4))
 
     response = []
     msg = ""
@@ -263,17 +269,15 @@ def ping():
         "channel": ADMIN
         })
 
-    if dice < 10:
+    if dice < 3:
         ## conjure an item
         response.append({
             "msg": conjure_handler(),
             "channel": "MAIN"
         })
     if dice > 90 and dice < 95:
-        ## pull a random command out of learned commands. if no commands
-        ## learned, just smile vacantly.
         response.append({
-            "msg": random.choice(SELF.get("tricks", [":)"])),
+            "msg": trick(),
             "channel": "MAIN"
             })
     if dice >= 98:
@@ -286,6 +290,18 @@ def ping():
     return response
 
 ## misc handlers
+
+def trick():
+    """
+    Pull a random command and return it. If no commands learned, just smile
+    vacantly.
+    """
+    trick = random.choice(SELF.get("tricks", [":)"]))
+    if trick in ["!water", "!talklike"]:
+        ## manual targetted tricks
+        trick = "{trick} {target}".format(trick=trick, target=random.choice(TOWNIES.keys()))
+
+    return trick
 
 def absorb(msg):
     """
